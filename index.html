@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Digital craftsman's workshop - 디지털 장인의 작업실">
+    <title>behelit - Digital Workshop</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0d0d0d;
+            --bg-lighter: #1a1a1a;
+            --accent-orange: #ff6b35;
+            --accent-cyan: #00d9ff;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999;
+            --border-rust: #8b4513;
+            --glow-color: rgba(255, 107, 53, 0.3);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', 'Noto Sans KR', monospace;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* 미묘한 노이즈 텍스처 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 3px, transparent 4px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* 헤더 */
+        header {
+            padding: 4rem 0 2rem;
+            border-bottom: 2px solid var(--border-rust);
+            position: relative;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--accent-orange);
+            text-transform: lowercase;
+            position: relative;
+            display: inline-block;
+            text-shadow: 
+                0 0 20px var(--glow-color),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+
+        .logo::after {
+            content: '_';
+            animation: blink 1.2s infinite;
+            color: var(--accent-cyan);
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* 언어 스위처 */
+        .lang-switcher {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-lighter);
+            padding: 0.5rem;
+            border: 1px solid var(--border-rust);
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .lang-btn::before {
+            content: '>';
+            position: absolute;
+            left: 0.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .lang-btn:hover {
+            color: var(--accent-orange);
+        }
+
+        .lang-btn.active {
+            color: var(--accent-orange);
+        }
+
+        .lang-btn.active::before {
+            opacity: 1;
+        }
+
+        /* 메인 섹션 */
+        section {
+            padding: 4rem 0;
+            border-bottom: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header::before {
+            content: '//';
+            color: var(--accent-cyan);
+            font-size: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-orange);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .content-box {
+            background: linear-gradient(135deg, var(--bg-lighter) 0%, var(--bg-dark) 100%);
+            border-left: 3px solid var(--accent-orange);
+            padding: 2rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .content-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .content-box p {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .content-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 텍스트 레이어 시스템 */
+        .text-ko, .text-jp, .text-en {
+            display: block;
+        }
+
+        [data-lang="ko"] .text-jp,
+        [data-lang="ko"] .text-en,
+        [data-lang="jp"] .text-ko,
+        [data-lang="jp"] .text-en,
+        [data-lang="en"] .text-ko,
+        [data-lang="en"] .text-jp {
+            display: none;
+        }
+
+        /* 링크 그리드 */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .link-card {
+            background: var(--bg-lighter);
+            border: 1px solid var(--border-rust);
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateX(5px);
+            box-shadow: -5px 5px 0 rgba(255, 107, 53, 0.2);
+        }
+
+        .link-card a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .link-card a::before {
+            content: '>';
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .link-card:hover a::before {
+            transform: translateX(5px);
+        }
+
+        /* 커맨드 라인 스타일 */
+        .command-line {
+            font-family: 'JetBrains Mono', monospace;
+            background: #000;
+            color: var(--accent-cyan);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-left: 3px solid var(--accent-cyan);
+            position: relative;
+        }
+
+        .command-line::before {
+            content: '$ ';
+            color: var(--accent-orange);
+        }
+
+        /* 작업물 그리드 */
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .work-item {
+            background: var(--bg-lighter);
+            border: 1px solid rgba(139, 69, 19, 0.5);
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .work-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-orange);
+            transition: width 0.3s;
+        }
+
+        .work-item:hover::after {
+            width: 100%;
+        }
+
+        .work-item:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .work-title {
+            font-size: 1.3rem;
+            color: var(--accent-orange);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .work-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 2px solid var(--border-rust);
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-orange);
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .lang-switcher {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            section {
+                padding: 3rem 0;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .links-grid,
+            .work-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 스크롤 애니메이션 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 미묘한 호버 글로우 */
+        .glow-on-hover {
+            transition: text-shadow 0.3s;
+        }
+
+        .glow-on-hover:hover {
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+    </style>
+</head>
+<body data-lang="ko">
+    
+    <!-- 언어 스위처 -->
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="switchLang('ko')">KO</button>
+        <button class="lang-btn" onclick="switchLang('jp')">JP</button>
+        <button class="lang-btn" onclick="switchLang('en')">EN</button>
+    </div>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="container">
+            <div class="logo-section">
+                <h1 class="logo glow-on-hover">behelit</h1>
+                <p class="tagline">
+                    <span class="text-ko">디지털 장인의 작업실</span>
+                    <span class="text-jp">デジタル職人の工房</span>
+                    <span class="text-en">DIGITAL CRAFTSMAN'S WORKSHOP</span>
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- About 섹션 -->
+        <section id="about" class="fade-in">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="text-ko">소개</span>
+                    <span class="text-jp">について</span>
+                    <span class="text-en">ABOUT</span>
+                </h2>
+            </div>
+            
+            <div class="content-box">
+                <p class="text-ko">
+                    코드와 픽셀로 물건을 만드는 디지털 장인의 작업실입니다.<br>
+                    키보드는 망치, 모니터는 작업대. 완벽한 것은 없지만, 모든 작업물에는 영혼이 담겨 있습니다.
+                </p>
+                <p class="text-jp">
+                    コードとピクセルで物を作るデジタル職人の工房です。<br>
+                    キーボードはハンマー、モニターは作業台。完璧なものはないが、すべての作品に魂が込められています。
+                </p>
+                <p class="text-en">
+                    A digital craftsman's workshop where things are built with code and pixels.<br>
+                    Keyboard as hammer, monitor as workbench. Nothing is perfect, but every work has soul.
+                </p>
+            </div>
+
+            <div class="command-line">
+                <span class="text-ko">handcrafted_with_passion = True</span>
+                <span class="text-jp">情熱で手作り = True</span>
+                <span class="text-en">handcrafted_with_passion = True</span>
+            </div>
+        </section>
+
+        <!-- Philosophy 섹션 -->
+        <section id="philosophy" class="fade-in">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="text-ko">철학</span>
+                    <span class="text-jp">哲学</span>
+                    <span class="text-en">PHILOSOPHY</span>
+                </h2>
+            </div>
+            
+            <div class="content-box">
+                <p class="text-ko">
+                    우리는 속도보다 깊이를, 트렌드보다 본질을 추구합니다.<br>
+                    디지털 시대의 장인정신은 0과 1 사이 어딘가에 존재하며,<br>
+                    모든 버그는 배움의 기회, 모든 프로젝트는 실험입니다.
+                </p>
+                <p class="text-jp">
+                    私たちは速度より深さを、トレンドより本質を追求します。<br>
+                    デジタル時代の職人魂は0と1の間のどこかに存在し、<br>
+                    すべてのバグは学びの機会、すべてのプロジェクトは実験です。
+                </p>
+                <p class="text-en">
+                    We pursue depth over speed, essence over trends.<br>
+                    Digital craftsmanship exists somewhere between zeros and ones,<br>
+                    Every bug is a learning opportunity, every project an experiment.
+                </p>
+            </div>
+        </section>
+
+        <!-- Works 섹션 -->
+        <section id="works" class="fade-in">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="text-ko">작업물</span>
+                    <span class="text-jp">作品</span>
+                    <span class="text-en">WORKS</span>
+                </h2>
+            </div>
+
+            <div class="work-grid">
+                <div class="work-item">
+                    <h3 class="work-title">
+                        <span class="text-ko">웹 개발</span>
+                        <span class="text-jp">ウェブ開発</span>
+                        <span class="text-en">Web Development</span>
+                    </h3>
+                    <p class="work-desc">
+                        <span class="text-ko">정적 사이트부터 인터랙티브 앱까지, 웹의 모든 영역을 탐험합니다.</span>
+                        <span class="text-jp">静的サイトからインタラクティブアプリまで、ウェブのすべての領域を探検します。</span>
+                        <span class="text-en">From static sites to interactive apps, exploring every corner of the web.</span>
+                    </p>
+                </div>
+
+                <div class="work-item">
+                    <h3 class="work-title">
+                        <span class="text-ko">디자인</span>
+                        <span class="text-jp">デザイン</span>
+                        <span class="text-en">Design</span>
+                    </h3>
+                    <p class="work-desc">
+                        <span class="text-ko">기능과 미학의 균형, 사용자 경험에 대한 끊임없는 고민.</span>
+                        <span class="text-jp">機能と美学のバランス、ユーザー体験への絶え間ない考察。</span>
+                        <span class="text-en">Balance of function and aesthetics, constant reflection on user experience.</span>
+                    </p>
+                </div>
+
+                <div class="work-item">
+                    <h3 class="work-title">
+                        <span class="text-ko">실험</span>
+                        <span class="text-jp">実験</span>
+                        <span class="text-en">Experiments</span>
+                    </h3>
+                    <p class="work-desc">
+                        <span class="text-ko">새로운 기술, 새로운 표현 방식. 실패해도 괜찮은 안전한 실험실.</span>
+                        <span class="text-jp">新しい技術、新しい表現方法。失敗しても大丈夫な安全な実験室。</span>
+                        <span class="text-en">New tech, new expressions. A safe lab where failure is okay.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Links 섹션 -->
+        <section id="links" class="fade-in">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="text-ko">연결</span>
+                    <span class="text-jp">リンク</span>
+                    <span class="text-en">LINKS</span>
+                </h2>
+            </div>
+
+            <div class="links-grid">
+                <div class="link-card">
+                    <a href="https://github.com/behelit" target="_blank">
+                        <span>GitHub</span>
+                    </a>
+                </div>
+                <div class="link-card">
+                    <a href="https://twitter.com/behelit" target="_blank">
+                        <span>X / Twitter</span>
+                    </a>
+                </div>
+                <div class="link-card">
+                    <a href="mailto:contact@behelit.kr">
+                        <span class="text-ko">이메일</span>
+                        <span class="text-jp">メール</span>
+                        <span class="text-en">Email</span>
+                    </a>
+                </div>
+                <div class="link-card">
+                    <a href="https://blog.behelit.kr" target="_blank">
+                        <span class="text-ko">블로그</span>
+                        <span class="text-jp">ブログ</span>
+                        <span class="text-en">Blog</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>
+                    <span class="text-ko">© 2025 behelit — 손으로 만든 디지털</span>
+                    <span class="text-jp">© 2025 behelit — 手作りのデジタル</span>
+                    <span class="text-en">© 2025 behelit — Handcrafted Digital</span>
+                </p>
+            </div>
+            <div class="footer-links">
+                <a href="#about">
+                    <span class="text-ko">소개</span>
+                    <span class="text-jp">について</span>
+                    <span class="text-en">About</span>
+                </a>
+                <a href="#works">
+                    <span class="text-ko">작업물</span>
+                    <span class="text-jp">作品</span>
+                    <span class="text-en">Works</span>
+                </a>
+                <a href="#links">
+                    <span class="text-ko">연결</span>
+                    <span class="text-jp">リンク</span>
+                    <span class="text-en">Links</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 언어 전환
+        function switchLang(lang) {
+            document.body.setAttribute('data-lang', lang);
+            
+            // 버튼 상태 업데이트
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // 스크롤 애니메이션
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 스무스 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 페이지 로드 애니메이션
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
